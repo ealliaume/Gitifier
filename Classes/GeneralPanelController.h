@@ -12,16 +12,20 @@
   NSNumberFormatter *numberFormatter;
   NSTextField *monitorIntervalField;
   NSButton *chooseGitPathButton;
+  NSButton *chooseBzrPathButton;
   NSButton *ignoreOwnEmailsField;
 }
 
 @property IBOutlet NSTextField *monitorIntervalField;
 @property IBOutlet NSButton *chooseGitPathButton;
+@property IBOutlet NSButton *chooseBzrPathButton;
 @property IBOutlet NSButton *ignoreOwnEmailsField;
 @property (readonly) id gitClass;
 
 // @public
 - (IBAction) openGitExecutableDialog: (id) sender;
+- (IBAction) openBzrExecutableDialog: (id) sender;
+
 
 // @private
 - (void) updateUserEmailText: (NSString *) email;

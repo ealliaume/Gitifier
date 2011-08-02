@@ -69,6 +69,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		AE0C07DE13E89BB000466389 /* Bzr.m in Sources */ = {isa = PBXBuildFile; fileRef = AE0C07DD13E89BB000466389 /* Bzr.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -207,6 +208,8 @@
 		58E81DC3128B2B7000062F15 /* LinkLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkLabel.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Gitifier-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Gitifier-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Gitifier.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gitifier.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE0C07DC13E89BB000466389 /* Bzr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bzr.h; sourceTree = "<group>"; };
+		AE0C07DD13E89BB000466389 /* Bzr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Bzr.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -479,6 +482,8 @@
 		58DEC81D1246C63400DE7C7E /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				AE0C07DC13E89BB000466389 /* Bzr.h */,
+				AE0C07DD13E89BB000466389 /* Bzr.m */,
 				584ED6FE13B37F780085E65C /* AboutPanelController.h */,
 				584ED6FF13B37F780085E65C /* AboutPanelController.m */,
 				58DEC81E1246C6B300DE7C7E /* Commit.h */,
@@ -659,6 +664,7 @@
 				584ED6FA13B37BF40085E65C /* GeneralPanelController.m in Sources */,
 				584ED6FD13B37F650085E65C /* RepositoriesPanelController.m in Sources */,
 				584ED70013B37F780085E65C /* AboutPanelController.m in Sources */,
+				AE0C07DE13E89BB000466389 /* Bzr.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,7 @@
 
 #define UserEmailChangedNotification @"UserEmailChangedNotification"
 #define GitExecutableSetNotification @"GitExecutableSetNotification"
+#define BzrExecutableSetNotification @"BzrExecutableSetNotification"
 
 #define ObserveDefaults(setting) [[NSUserDefaultsController sharedUserDefaultsController] \
   addObserver: self forKeyPath: PSFormat(@"values.%@", setting) options: 0 context: nil]

@@ -8,13 +8,14 @@
 #import "Defaults.h"
 #import "GeneralPanelController.h"
 #import "Git.h"
+#import "Bzr.h"
 #import "GitifierAppDelegate.h"
 
 #define IGNORE_MY_COMMITS_TEXT @"Ignore my own commits"
 
 @implementation GeneralPanelController
 
-@synthesize monitorIntervalField, ignoreOwnEmailsField, chooseGitPathButton;
+@synthesize monitorIntervalField, ignoreOwnEmailsField, chooseGitPathButton, chooseBzrPathButton;
 
 - (id) init {
   return [super initWithNibName: @"GeneralPreferencesPanel" bundle: nil];
@@ -31,6 +32,13 @@
   if (![NSOpenPanel instancesRespondToSelector: @selector(setShowsHiddenFiles:)]) {
     [chooseGitPathButton removeFromSuperview];
   }
+  if (![NSOpenPanel instancesRespondToSelector: @selector(setShowsHiddenFiles:)]) {
+    [chooseBzrPathButton removeFromSuperview];
+  }    
+}
+
+- (id) bzrClass {
+    return [Bzr class];
 }
 
 - (id) gitClass {
@@ -47,6 +55,27 @@
 
 - (NSString *) toolbarItemLabel {
   return @"General";
+}
+
+- (IBAction) openBzrExecutableDialog: (id) sender {
+    NSOpenPanel *panel = [NSOpenPanel openPanel];
+    panel.title = @"Select Bzr executable";
+    panel.directoryURL = [NSURL fileURLWithPath: NSOpenStepRootDirectory()];
+    panel.delegate = self;
+    panel.canChooseFiles = YES;
+    panel.canChooseDirectories = NO;
+    panel.resolvesAliases = NO;
+    panel.allowsMultipleSelection = NO;
+    panel.canCreateDirectories = NO;
+    panel.showsHiddenFiles = YES;
+    panel.treatsFilePackagesAsDirectories = NO;
+    
+    NSInteger result = [panel runModal];
+    
+    if (result == NSFileHandlingPanelOKButton) {
+        NSURL *url = [[panel URLs] psFirstObject];
+        [Bzr setBzrExecutable: url.path];
+    }
 }
 
 - (IBAction) openGitExecutableDialog: (id) sender {
@@ -86,7 +115,7 @@
   } else if (isDirectory) {
     return YES;
   } else {
-    return [[url lastPathComponent] isEqual: @"git"];
+    return [[url lastPathComponent] isEqual: @"git"] || [[url lastPathComponent] isEqual: @"bzr"];
   }
 }
 
