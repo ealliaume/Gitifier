@@ -16,6 +16,7 @@
 
 @property IBOutlet RepositoryListController *repositoryListController;
 @property (readonly) id gitClass;
+@property (readonly) id bzrClass;
 
 - (IBAction) removeRepositories: (id) sender;
 

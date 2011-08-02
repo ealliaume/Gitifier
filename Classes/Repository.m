@@ -9,6 +9,7 @@
 
 #import "Commit.h"
 #import "Git.h"
+#import "Bzr.h"
 #import "GrowlController.h"
 #import "Repository.h"
 
@@ -65,6 +66,8 @@ static NSString *commitRangeRegexp = @"[0-9a-f]+\\.\\.[0-9a-f]+";
     url = anUrl;
     git = [[Git alloc] initWithDelegate: self];
     git.repositoryUrl = self.url;
+    bzr = [[Bzr alloc] initWithDelegate: self];
+    bzr.repositoryUrl = self.url;      
     name = [self nameFromUrl: url];
     commitUrlPattern = [self findCommitUrlPattern];
     status = ActiveRepository;
@@ -115,7 +118,15 @@ static NSString *commitRangeRegexp = @"[0-9a-f]+\\.\\.[0-9a-f]+";
 
   if (cachesDirectoryExists && workingCopyDoesntExist) {
     isBeingUpdated = YES;
-    [git runCommand: @"clone" withArguments: PSArray(url, workingCopy, @"-n") inPath: cachesDirectory];
+      
+    // if url contains "git"  
+    NSString *searchForMe = @"git";  
+    NSRange range = [url rangeOfString : searchForMe];
+    if (range.location != NSNotFound) {
+        [git runCommand: @"clone" withArguments: PSArray(url, workingCopy, @"-n") inPath: cachesDirectory];      
+    } else {
+        [bzr runCommand: @"branch" withArguments: PSArray(url, workingCopy) inPath: cachesDirectory];     
+    }
   } else {
     [self notifyDelegateWithSelector: @selector(repositoryCouldNotBeCloned:)];
   }

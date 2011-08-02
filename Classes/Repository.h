@@ -19,10 +19,12 @@ typedef enum { ActiveRepository, UnavailableRepository } RepositoryStatus;
 
 @class Commit;
 @class Git;
+@class Bzr;
 
 @interface Repository : NSObject {
   RepositoryStatus status;
   Git *git;
+  Bzr *bzr;  
   NSString *url;
   NSString *name;
   NSString *commitUrlPattern;

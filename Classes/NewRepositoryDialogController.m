@@ -43,8 +43,8 @@
 
   editedRepository = [[Repository alloc] initWithUrl: url];
   if (!editedRepository) {
-    [self showAlertWithTitle: @"This doesn't look like a git URL."
-                     message: @"Please enter a proper git repository address."];
+    [self showAlertWithTitle: @"This doesn't look like a git/bzr URL."
+                     message: @"Please enter a proper git/bzr repository address."];
     return;
   }
 

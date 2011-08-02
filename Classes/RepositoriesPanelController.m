@@ -6,6 +6,7 @@
 // -------------------------------------------------------
 
 #import "Git.h"
+#import "Bzr.h"
 #import "RepositoriesPanelController.h"
 #import "RepositoryListController.h"
 
@@ -31,6 +32,10 @@
 
 - (id) gitClass {
   return [Git class];
+}
+
+- (id) bzrClass {
+    return [Bzr class];
 }
 
 - (IBAction) removeRepositories: (id) sender {
