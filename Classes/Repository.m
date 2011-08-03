@@ -138,7 +138,15 @@ static NSString *commitRangeRegexp = @"[0-9a-f]+\\.\\.[0-9a-f]+";
     if (workingCopy) {
       if ([self directoryExists: workingCopy]) {
         isBeingUpdated = YES;
-        [git runCommand: @"fetch" inPath: workingCopy];
+          
+        // if url contains "git"
+        NSString *searchForMe = @"git";  
+        NSRange range = [url rangeOfString : searchForMe];
+        if (range.location != NSNotFound) {
+            [git runCommand: @"fetch" inPath: workingCopy];
+        } else {
+            [bzr runCommand: @"pull" inPath: workingCopy];
+        }
       } else {
         NSLog(@"Working copy directory %@ was deleted, I need to clone it again.", workingCopy);
         [self clone];
@@ -150,15 +158,24 @@ static NSString *commitRangeRegexp = @"[0-9a-f]+\\.\\.[0-9a-f]+";
 }
 
 - (void) cancelCommands {
-  [git cancelCommands];
+    // if url contains "git"
+    NSString *searchForMe = @"git";  
+    NSRange range = [url rangeOfString : searchForMe];
+    if (range.location != NSNotFound) {
+        [git cancelCommands];
+    } else {
+        [bzr cancelCommands];
+    }    
+  
 }
 
 - (void) deleteWorkingCopy {
   [self ensureDirectoryIsDeleted: [self workingCopyDirectory]];
 }
 
+// TODO erwan
 - (void) commandCompleted: (NSString *) command output: (NSString *) output {
-  if ([command isEqual: @"clone"]) {
+  if ([command isEqual: @"clone"] || [command isEqual: @"branch"]) {
     isBeingUpdated = NO;
     [self notifyDelegateWithSelector: @selector(repositoryWasCloned:)];
   } else if ([command isEqual: @"fetch"]) {
@@ -171,6 +188,10 @@ static NSString *commitRangeRegexp = @"[0-9a-f]+\\.\\.[0-9a-f]+";
       isBeingUpdated = NO;
       status = ActiveRepository;
     }
+  } else if ([command isEqual: @"pull"]) {    
+      // todo 
+  } else if ([command isEqual: @"logbzr"]) {    
+      // todo       
   } else if ([command isEqual: @"log"]) {
     NSArray *commitData = [output arrayOfCaptureComponentsMatchedByRegex:
                                   @"([^\\n]+)\\n([^\\n]+)\\n([^\\n]+)\\n([^\\n]+)\\n([^\\n]+)(\\n\\n)"];
@@ -192,7 +213,7 @@ static NSString *commitRangeRegexp = @"[0-9a-f]+\\.\\.[0-9a-f]+";
 
 - (void) commandFailed: (NSString *) command output: (NSString *) output {
   isBeingUpdated = NO;
-  if ([command isEqual: @"clone"]) {
+  if ([command isEqual: @"clone"] || [command isEqual: @"branch"]) {
     [self notifyDelegateWithSelector: @selector(repositoryCouldNotBeCloned:)];
   } else if (status != UnavailableRepository) {
     status = UnavailableRepository;
@@ -206,6 +227,7 @@ static NSString *commitRangeRegexp = @"[0-9a-f]+\\.\\.[0-9a-f]+";
   return [anUrl psIsPresent];
 }
 
+// TODO
 - (NSString *) nameFromUrl: (NSString *) anUrl {
   NSArray *names = [anUrl componentsSeparatedByRegex: @"[/:]"];
   NSString *projectName = [names lastObject];

@@ -13,6 +13,7 @@
 #import "Commit.h"
 #import "Defaults.h"
 #import "Git.h"
+#import "Bzr.h"
 #import "GitifierAppDelegate.h"
 #import "GrowlController.h"
 #import "PreferencesWindowController.h"
@@ -33,8 +34,10 @@
 
   PSObserve(nil, NSWindowDidBecomeMainNotification, windowBecameMain:);
   PSObserve(nil, GitExecutableSetNotification, gitPathUpdated);
+  PSObserve(nil, BzrExecutableSetNotification, gitPathUpdated);
   ObserveDefaults(KEEP_WINDOWS_ON_TOP_KEY);
   [self loadGitPath];
+  [self loadBzrPath];  
 
   [[GrowlController sharedController] setRepositoryListController: repositoryListController];
   [[GrowlController sharedController] checkGrowlAvailability];
@@ -140,17 +143,41 @@
     Git *git = [[Git alloc] initWithDelegate: self];
     [git runCommand: @"config" withArguments: PSArray(@"user.email") inPath: NSHomeDirectory()];
   }
+  if (!userEmail && [Bzr bzrExecutable]) {
+    Bzr *bzr = [[Bzr alloc] initWithDelegate: self];
+    [bzr runCommand: @"whoami" withArguments: PSArray(@"--emaill") inPath: NSHomeDirectory()];
+  }    
 }
 
 // --- git path management ---
 
+- (void) loadBzrPath {
+    NSString *path = [GitifierDefaults objectForKey: BZR_EXECUTABLE_KEY];
+    if (path) {
+        [Bzr setBzrExecutable: path];
+    } else {
+        [self findBzrPath];
+    }
+}
+
 - (void) loadGitPath {
   NSString *path = [GitifierDefaults objectForKey: GIT_EXECUTABLE_KEY];
   if (path) {
-    [Git setGitExecutable: path];
+    [Bzr setBzrExecutable: path];
   } else {
     [self findGitPath];
   }
+}
+
+- (void) bzrPathUpdated {
+    NSString *bzr = [Bzr bzrExecutable];
+    if (bzr) {
+        [self updateUserEmail];
+        [self validateBzrPath];
+        [GitifierDefaults setObject: bzr forKey: BZR_EXECUTABLE_KEY];
+    } else {
+        [GitifierDefaults removeObjectForKey: BZR_EXECUTABLE_KEY];
+    }
 }
 
 - (void) gitPathUpdated {
@@ -164,9 +191,42 @@
   }
 }
 
+- (void) validateBzrPath {
+    Bzr *bzr = [[Bzr alloc] initWithDelegate: self];
+    [bzr runCommand: @"help" inPath: NSHomeDirectory()];
+}
+
 - (void) validateGitPath {
   Git *git = [[Git alloc] initWithDelegate: self];
   [git runCommand: @"version" inPath: NSHomeDirectory()];
+}
+
+- (void) findBzrPath {
+    NSPipe *inputPipe = [NSPipe pipe];
+    NSPipe *outputPipe = [NSPipe pipe];
+    NSTask *task = [[NSTask alloc] init];
+    task.launchPath = @"/bin/bash";
+    task.arguments = PSArray(@"--login", @"-c", @"which bzr");
+    task.currentDirectoryPath = NSHomeDirectory();
+    task.standardOutput = outputPipe;
+    task.standardError = outputPipe;
+    task.standardInput = inputPipe;
+    @try {
+        [task launch];
+        [task waitUntilExit];
+    } @catch (NSException *e) {
+        NSRunAlertPanel(@"Error: bash not found.",
+                        @"Dude, if you don't even have bash, something is seriously wrong...",
+                        @"OMG!", nil, nil);
+        return;
+    }
+    
+    NSData *data = [[[task standardOutput] fileHandleForReading] readDataToEndOfFile];
+    NSString *output = [[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] psTrimmedString];
+    
+    if (output && (output.length > 0) && (task.terminationStatus == 0)) {
+        [Bzr setBzrExecutable: output];
+    }
 }
 
 - (void) findGitPath {
@@ -197,6 +257,13 @@
   }
 }
 
+- (void) rejectBzrPath {
+    NSRunAlertPanel(@"Incorrect Bzr path",
+                    PSFormat(@"The file at %@ is not a Bzr executable.", [Bzr bzrExecutable]),
+                    @"OK", nil, nil);
+    [Bzr setBzrExecutable: nil];
+}
+
 - (void) rejectGitPath {
   NSRunAlertPanel(@"Incorrect Git path",
                   PSFormat(@"The file at %@ is not a Git executable.", [Git gitExecutable]),
@@ -207,7 +274,7 @@
 // --- git command callbacks ---
 
 - (void) commandCompleted: (NSString *) command output: (NSString *) output {
-  if ([command isEqual: @"config"]) {
+  if ([command isEqual: @"config"] || [command isEqual: @"whoami"]) {
     if (output && output.length > 0) {
       userEmail = [output psTrimmedString];
       PSNotifyWithData(UserEmailChangedNotification, PSHash(@"email", userEmail));
@@ -216,12 +283,18 @@
     if (!output || ![output isMatchedByRegex: @"^git version \\d"]) {
       [self rejectGitPath];
     }
+  } else if ([command isEqual: @"help"]) {
+    if (!output || ![output isMatchedByRegex: @"^Bazaar \\d"]) {
+      [self rejectGitPath];
+    }    
   }
 }
 
 - (void) commandFailed: (NSString *) command output: (NSString *) output {
   if ([command isEqual: @"version"]) {
     [self rejectGitPath];
+  } else if ([command isEqual: @"help"]) {
+      [self rejectBzrPath];
   }
 }
 

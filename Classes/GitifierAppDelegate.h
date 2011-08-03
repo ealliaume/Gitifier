@@ -38,5 +38,8 @@
 - (void) loadGitPath;
 - (void) findGitPath;
 - (void) validateGitPath;
+- (void) loadBzrPath;
+- (void) findBzrPath;
+- (void) validateBzrPath;
 
 @end

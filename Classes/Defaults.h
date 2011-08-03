@@ -12,6 +12,7 @@
 #define IGNORE_MERGES_KEY @"ignoreMerges"
 #define IGNORE_OWN_COMMITS @"ignoreOwnCommits"
 #define GIT_EXECUTABLE_KEY @"gitExecutable"
+#define BZR_EXECUTABLE_KEY @"bzrExecutable"
 #define STICKY_NOTIFICATIONS_KEY @"stickyNotifications"
 #define SHOW_DIFF_WINDOW_KEY @"showDiffWindow"
 #define OPEN_DIFF_IN_BROWSER_KEY @"openDiffInBrowser"
